@@ -101,7 +101,7 @@ ROBOT_TYPE_TO_EMBODIMENT_TAG = {
 
 # ---------------------------------------------------------------------------
 # Mixtures
-# Dataset root: playground/Datasets/VLA_ARENA_LEROBOT_DATA/
+# Dataset root: playground/Datasets/vla_arena/
 # ---------------------------------------------------------------------------
 DATASET_NAMED_MIXTURES = {
     "vla_arena_L0_S": [

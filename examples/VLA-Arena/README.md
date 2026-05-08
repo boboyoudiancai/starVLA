@@ -46,7 +46,7 @@ bash examples/VLA-Arena/data_preparation.sh
 
 This will:
 1. Download the Large split to `$DEST/vla_arena/`
-2. Create `playground/Datasets/VLA_ARENA_LEROBOT_DATA` → `$DEST/vla_arena/`
+2. Create `playground/Datasets/vla_arena` → `$DEST/vla_arena/`
 3. Copy `train_files/modality.json` into each dataset's `meta/` directory
 
 To use the Small or Medium split instead, modify the corresponding lines in `data_preparation.sh`.

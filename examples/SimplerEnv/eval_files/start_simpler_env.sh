@@ -1,27 +1,28 @@
 #!/bin/bash
+set -euo pipefail
 
-echo `which python`
+echo "$(which python)"
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
+export star_vla_python="${STARVLA_PYTHON:-python}"
+export sim_python="${SIM_PYTHON:-python}"
+export SimplerEnv_PATH="${SIMPLERENV_PATH:-${REPO_ROOT}/../SimplerEnv}"
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
+port="${PORT:-6678}"
+gpu_id="${GPU_ID:-0}"
+
+your_ckpt="${CKPT:-playground/Checkpoints/0418_oxe_bridge_rt_1_QwenGR00T/checkpoints/steps_10000_pytorch_model.pt}"
 
 
-############# Environment setup #############
-cd /home/jye624/Projcets/starVLA
-export star_vla_python=/home/jye624/.conda/envs/starVLA/bin/python
-export sim_python=/home/jye624/.conda/envs/simpler_env/bin/python
-export SimplerEnv_PATH=/project/vonneumann1/jye624/Projcets/SimplerEnv
-export PYTHONPATH=$(pwd):${PYTHONPATH}
-export LD_LIBRARY_PATH=/home/jye624/.conda/envs/simpler_env/lib:${LD_LIBRARY_PATH}
-port=6678 
-gpu_id=0
 
 
-
-your_ckpt=./results/Checkpoints/0418_oxe_bridge_rt_1_QwenGR00T/checkpoints/steps_10000_pytorch_model.pt
-
-
-
-
-MODEL_PATH=${1:-"${your_ckpt}"}
-port=${2:-"${port}"}
+MODEL_PATH="${1:-${your_ckpt}}"
+port="${2:-${port}}"
 
 ############# Environment setup #############
 

@@ -12,7 +12,7 @@ Framework_name=QwenOFT
 freeze_module_list=''
 base_vlm=playground/Pretrained_models/Qwen3-VL-4B-Instruct
 config_yaml=./examples/Robotwin/train_files/starvla_cotrain_robotwin_abs.yaml
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 data_mix=robotwin_all_50
 run_id=0129_${data_mix}_qwen3OFT_all
 # === End of environment variable configuration ===

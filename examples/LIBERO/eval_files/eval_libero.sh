@@ -1,19 +1,21 @@
 #!/bin/bash
-# === Paths (adapted for this cluster) ===
-STARVLA_DIR=/home/jye624/Projcets/starVLA
+set -euo pipefail
 
-cd ${STARVLA_DIR}
-# === Checkpoint ===
-CKPT=${STARVLA_DIR}/playground/Checkpoints/0405_libero4in1_CosmoPredict2GR00T/checkpoints/steps_50000_pytorch_model.pt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
+CKPT="${CKPT:-playground/Checkpoints/0405_libero4in1_CosmoPredict2GR00T/checkpoints/steps_50000_pytorch_model.pt}"
 
 ###########################################################################################
 # === Please modify the following paths according to your environment ===
-export LIBERO_HOME=/home/jye624/Projcets/LIBERO
-export LIBERO_CONFIG_PATH=${LIBERO_HOME}/libero
-export LIBERO_Python=/home/jye624/.conda/envs/libero/bin/python
+export LIBERO_HOME="${LIBERO_HOME:-${REPO_ROOT}/../LIBERO}"
+export LIBERO_CONFIG_PATH="${LIBERO_HOME}/libero"
+export LIBERO_Python="${LIBERO_PYTHON:-python}"
 
-export PYTHONPATH=$PYTHONPATH:${LIBERO_HOME} # let eval_libero find the LIBERO tools
-export PYTHONPATH=$(pwd):${PYTHONPATH} # let LIBERO find the websocket tools from main repo
+export PYTHONPATH="${LIBERO_HOME}:${REPO_ROOT}:${PYTHONPATH:-}"
 
 export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
@@ -21,7 +23,7 @@ export PYOPENGL_PLATFORM=egl
 host="127.0.0.1"
 base_port=6694
 unnorm_key="franka"
-your_ckpt=${CKPT}
+your_ckpt="${CKPT}"
 
 # export DEBUG=true
 

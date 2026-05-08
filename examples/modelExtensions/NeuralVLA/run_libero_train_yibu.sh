@@ -1,4 +1,13 @@
 
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
 # export HF_HOME=/mnt/petrelfs/share/yejinhui/Models/huggingface_cache
 
 # export NCCL_SOCKET_IFNAME=bond0
@@ -8,9 +17,9 @@
 # export NCCL_BLOCKING_WAIT=1
 # export NCCL_ASYNC_ERROR_HANDLING=1
 # export NCCL_TIMEOUT=1000  # Timeout set to 1 hour (unit: seconds)
-MODEL_PATH=/workspace/model/models--Qwen--Qwen2.5-VL-3B-Instruct/snapshots/66285546d2b821cf421d4f5eb2576359d3770cd3 # must be a local path, due to simpler will run in other
-data_root_dir=/workspace/dataset/libero_goal_no_noops_1.0.0_lerobot/datasets--IPEC-COMMUNITY--libero_goal_no_noops_1.0.0_lerobot/snapshots
-run_root_dir=./playground/Checkpoints
+MODEL_PATH=playground/Pretrained_models/Qwen2.5-VL-3B-Instruct
+data_root_dir=playground/Datasets/libero_goal_no_noops_1.0.0_lerobot
+run_root_dir=playground/Checkpoints
 run_id=1104_neurovla_gru_xiaonao_goal_dualimage_spike_multistep_ac8_768*2_yibu
 export WANDB_MODE=disabled
 
@@ -49,5 +58,4 @@ accelerate launch \
   --wandb_project spikeVLA-MLP \
   --wandb_entity weiyuguo \
   # --is_debug True
-
 

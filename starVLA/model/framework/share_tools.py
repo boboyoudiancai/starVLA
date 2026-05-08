@@ -17,6 +17,7 @@ from typing import Any
 from omegaconf import OmegaConf
 
 from starVLA.training.trainer_utils import initialize_overwatch
+from starVLA.path_tool import normalize_cfg_paths
 
 # Initialize Overwatch =>> Wraps `logging.Logger`
 overwatch = initialize_overwatch(__name__)
@@ -511,6 +512,8 @@ def apply_config_compat(cfg, *, strict: bool = False):
             OmegaConf.update(cfg, f"{am_path}.past_action_window_size", 0, force_add=True)
 
     # ---- 6. stamp version ----
+    cfg = normalize_cfg_paths(cfg)
+
     if src_version != CONFIG_VERSION:
         try:
             OmegaConf.update(cfg, "version_id", CONFIG_VERSION, force_add=True)

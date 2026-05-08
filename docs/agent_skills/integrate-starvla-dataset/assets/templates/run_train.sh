@@ -11,7 +11,7 @@ freeze_module_list=''                      # e.g. 'qwen_vl' to freeze the VLM ba
 config_yaml=./examples/<<TODO_BENCH>>/train_files/starvla_<<TODO_FRAMEWORK>>_<<TODO_BENCH>>.yaml
 data_root_dir=playground/Datasets/<<TODO_DATASET_PARENT_DIR>>
 data_mix=<<TODO_MIXTURE_NAME>>
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 run_id=starvla_<<TODO_FRAMEWORK>>_<<TODO_BENCH>>_smoke
 num_processes=2                            # number of GPUs
 ###########################################################################################

@@ -13,7 +13,7 @@ Framework_name=QwenOFT
 freeze_module_list=''
 base_vlm=playground/Pretrained_models/Qwen3-VL-4B-Instruct
 config_yaml=./examples/DOMINO/train_files/starvla_train_domino.yaml
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 # Available mixtures (see examples/DOMINO/train_files/data_registry/data_config.py):
 #   domino                 - 35 tasks x (Clean_Dynamic + Random_Dynamic)
 #   domino_clean           - 35 tasks x Clean_Dynamic

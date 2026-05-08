@@ -1,7 +1,7 @@
 cd /mnt/petrelfs/yejinhui/Projects/llavavla
 # conda activate starvlaSAM
 
-MODEL_DIR=/mnt/petrelfs/yejinhui/Projects/llavavla/results/Checkpoints/1017_Qwen3PI
+MODEL_DIR=playground/Checkpoints/1017_Qwen3PI
 
 step=55000
 

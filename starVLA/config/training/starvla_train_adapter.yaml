@@ -1,5 +1,5 @@
 run_id: starvla
-run_root_dir: path/to/result
+run_root_dir: playground/Checkpoints
 seed: 42
 wandb_entity: your-wandb-entity
 wandb_project: your-wandb-project
@@ -30,7 +30,7 @@ datasets:
   vla_data:
     dataset_py: lerobot_datasets
     include_state: false
-    data_root_dir: playground/Datasets/LEROBOT_LIBERO_DATA
+    data_root_dir: playground/Datasets/libero
     data_mix: libero_all # libero_goal
     action_type: delta_qpos
     CoT_prompt: "Your task is {instruction}. To identify the key objects for your task. Locate their bounding boxes in [x1,y1,x2,y2] format."

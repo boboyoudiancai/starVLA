@@ -1,24 +1,29 @@
 #!/bin/bash
+set -euo pipefail
 
-# Debug: Print the current Python environment
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
 echo "Using Python: $(which python)"
-
-# Set necessary environment variables
-export star_vla_python=/data/wzx/conda_env/starVLA/bin/python
-export sim_python=/data/wzx/behavior/bin/python
-export BEHAVIOR_PATH=/data/wzx/behavior_evaluation/behavior/Datasets/BEHAVIOR_challenge
-export PYTHONPATH=$(pwd):${PYTHONPATH}
+export star_vla_python="${STARVLA_PYTHON:-python}"
+export sim_python="${SIM_PYTHON:-python}"
+export BEHAVIOR_PATH="${BEHAVIOR_PATH:-playground/Datasets/behavior-1k}"
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
 
 # Configure model path and port
-MODEL_PATH="/data/wzx/behavior_evaluation/behavior/playground/Pretrained_models/Qwen3-VL-GR00T-Behavior-nostate/checkpoints/steps_20000_pytorch_model.pt"
-PORT=10197
+MODEL_PATH="${CKPT:-playground/Pretrained_models/Qwen3-VL-GR00T-Behavior-nostate/checkpoints/steps_20000_pytorch_model.pt}"
+PORT="${PORT:-10197}"
 WRAPPERS="DefaultWrapper"
 USE_STATE=False  # Whether to use state as part of the observation
 
 # Configure task name
 TASK_NAME="turning_on_radio"  # Choose a simple task
-LOG_FILE="/data/wzx/behavior_evaluation/behavior/playground/Pretrained_models/Qwen3-VL-GR00T-Behavior-nostate/checkpoints/client_logs/log_${TASK_NAME}.txt"
-SERVER_LOG_FILE="/data/wzx/behavior_evaluation/behavior/playground/Pretrained_models/Qwen3-VL-GR00T-Behavior-nostate/checkpoints/server_logs/log_${TASK_NAME}.txt"
+LOG_FILE="$(dirname "${MODEL_PATH}")/client_logs/log_${TASK_NAME}.txt"
+SERVER_LOG_FILE="$(dirname "${MODEL_PATH}")/server_logs/log_${TASK_NAME}.txt"
+mkdir -p "$(dirname "${LOG_FILE}")" "$(dirname "${SERVER_LOG_FILE}")"
 
 # Start server
 echo "▶️ Starting server on port ${PORT}..."

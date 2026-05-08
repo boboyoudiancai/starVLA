@@ -18,7 +18,7 @@ config_yaml=./examples/calvin/train_files/starvla_train_calvin.yaml
 DIT_TYPE="DiT-B"
 calvin_data_root=playground/Datasets/calvin
 data_mix=calvin_task_D_D
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 run_id=0118_starvla_qwenpi_calvin_task_D_D
 export action_input_dim=2048
 # === End of environment variable configuration ===

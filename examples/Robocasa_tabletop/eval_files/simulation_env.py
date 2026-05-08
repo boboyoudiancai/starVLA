@@ -277,7 +277,7 @@ class Args:
     seed: int = 7  # Random Seed (for reproducibility)
 
     pretrained_path: str = (
-        "results/Checkpoints/1029_qwenGR00T_fourier_gr1_unified_1000_PnPMilkToMicrowaveClose_gpus_woPretrain_wState/checkpoints/steps_20000_pytorch_model.pt"
+        "playground/Checkpoints/1029_qwenGR00T_fourier_gr1_unified_1000_PnPMilkToMicrowaveClose_gpus_woPretrain_wState/checkpoints/steps_20000_pytorch_model.pt"
     )
 
 

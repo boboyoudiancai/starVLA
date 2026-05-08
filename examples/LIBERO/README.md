@@ -98,13 +98,13 @@ Finally, each result will also save a video for visualization, as shown below:
 # 🚀 LIBERO Training
 
 ## 📦 Step 0: Download the training dataset
-Download the datasets to the playground/Datasets/LEROBOT_LIBERO_DATA directory:
+Download the datasets to the playground/Datasets/libero directory:
 - [LIBERO-spatial](https://huggingface.co/datasets/IPEC-COMMUNITY/libero_spatial_no_noops_1.0.0_lerobot)
 - [LIBERO-object](https://huggingface.co/datasets/IPEC-COMMUNITY/libero_object_no_noops_1.0.0_lerobot)
 - [LIBERO-goal](https://huggingface.co/datasets/IPEC-COMMUNITY/libero_goal_no_noops_1.0.0_lerobot)
 - [LIBERO-10](https://huggingface.co/datasets/IPEC-COMMUNITY/libero_10_no_noops_1.0.0_lerobot)
 
-And move `modality.json` to each `$LEROBOT_LIBERO_DATA/subset/meta/modality.json`.
+And move `modality.json` to each `$libero/subset/meta/modality.json`.
 
 You could quickly prepare these by running:
 ```bash

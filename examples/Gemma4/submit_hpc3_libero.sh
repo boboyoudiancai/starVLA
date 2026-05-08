@@ -43,9 +43,9 @@ ENABLE_GRAD_CKPT="${ENABLE_GRAD_CKPT:-true}"
 ZERO_STAGE="${ZERO_STAGE:-2}"
 RUN_ID="${RUN_ID:-gemma4_${FRAMEWORK}_${DATA_MIX}_${SLURM_JOB_ID:-local}}"
 
-LIBERO_DATA_ROOT="${LIBERO_DATA_ROOT:-playground/Datasets/LEROBOT_LIBERO_DATA}"
+LIBERO_DATA_ROOT="${LIBERO_DATA_ROOT:-playground/Datasets/libero}"
 CONFIG_YAML="examples/LIBERO/train_files/starvla_cotrain_libero.yaml"
-RUN_ROOT_DIR="${RUN_ROOT_DIR:-results/Checkpoints}"
+RUN_ROOT_DIR="${RUN_ROOT_DIR:-playground/Checkpoints}"
 
 mkdir -p "${RUN_ROOT_DIR}/${RUN_ID}" logs
 cp "$0" "${RUN_ROOT_DIR}/${RUN_ID}/" || true

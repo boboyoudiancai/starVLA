@@ -4,12 +4,12 @@
 # set the environment variables
 export star_vla_python=/root/miniconda3/envs/starVLA/bin/python
 export sim_python=/root/miniconda3/envs/behavior/bin/python
-export TASKS_JSONL_PATH=/workspace/llavavla0/examples/Behavior/tasks.jsonl
-export BEHAVIOR_ASSET_PATH=/workspace/llavavla0/BEHAVIOR-1K/datasets
+export TASKS_JSONL_PATH=examples/Behavior/tasks.jsonl
+export BEHAVIOR_ASSET_PATH=playground/Datasets/behavior-1k
 export PYTHONPATH=$(pwd):${PYTHONPATH}
 
 # set the eval parameters
-MODEL_PATH=/workspace/llavavla0/playground/Checkpoints/BEHAVIOR-QwenDual-Pretrained-224/checkpoints/steps_300000_pytorch_model.pt
+MODEL_PATH=playground/Checkpoints/BEHAVIOR-QwenDual-Pretrained-224/checkpoints/steps_300000_pytorch_model.pt
 base_port=10197
 WRAPPERS="DefaultWrapper" # DefaultWrapper, RGBLowResWrapper or RichObservationWrapper
 USE_STATE=True # whether to use state as part of the observation
@@ -39,7 +39,7 @@ source "${SCRIPT_DIR}/port_utils.sh"
 
 if [ -z "$MODEL_PATH" ]; then
   echo "❌ MODEL_PATH not provided as the first argument, using default value"
-  export MODEL_PATH="./results/Checkpoints/1007_qwenLargefm/checkpoints/steps_20000_pytorch_model.pt"
+  export MODEL_PATH="playground/Checkpoints/1007_qwenLargefm/checkpoints/steps_20000_pytorch_model.pt"
 fi
 
 ckpt_path=${MODEL_PATH}

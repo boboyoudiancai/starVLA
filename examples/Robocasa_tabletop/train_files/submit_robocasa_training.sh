@@ -53,7 +53,7 @@ export DIT_TYPE="DiT-B"
 export config_yaml=./examples/Robocasa_tabletop/train_files/starvla_cotrain_robocasa_gr1.yaml
 export data_mix=fourier_gr1_unified_1000
 export include_state=True
-export run_root_dir=./results/Checkpoints
+export run_root_dir=playground/Checkpoints
 export run_id=debug_1224_${data_mix}_${Framework_name}_nostate_qwen3
 # === End of environment variable configuration ===
 ###########################################################################################

@@ -73,15 +73,16 @@ This requires [Qwen3-VL-4B-Instruct](https://huggingface.co/Qwen/Qwen3-VL-4B-Ins
 StarVLA uses **LeRobot-format** datasets. We provide a one-command script to download all four LIBERO suites (Spatial, Object, Goal, Long-Horizon) plus the co-training VLM data:
 
 ```bash
-# Set DEST to where you want to store the raw data (can be a shared disk)
-export DEST=/path/to/your/data/directory
+# Default target is `playground/Datasets`, which is expected to be a top-level
+# symlink managed by `.starvla.env` + `starVLA/path_tool.py`.
+# You can still override DEST manually if needed.
 bash examples/LIBERO/data_preparation.sh
 ```
 
 This script will:
 1. Download 4 LIBERO subsets from HuggingFace (`libero_spatial`, `libero_object`, `libero_goal`, `libero_10`)
 2. Download the VLM co-training data ([LLaVA-OneVision-COCO](https://huggingface.co/datasets/StarVLA/LLaVA-OneVision-COCO))
-3. Create symlinks under `playground/Datasets/`
+3. Write directly into `playground/Datasets/` (which should already point to your large-data disk)
 4. Copy `modality.json` into each dataset's `meta/` folder
 
 <details>
@@ -89,13 +90,13 @@ This script will:
 
 ```bash
 # Download each dataset individually
-huggingface-cli download IPEC-COMMUNITY/libero_spatial_no_noops_1.0.0_lerobot --repo-type dataset --local-dir playground/Datasets/LEROBOT_LIBERO_DATA/libero_spatial_no_noops_1.0.0_lerobot
-huggingface-cli download IPEC-COMMUNITY/libero_object_no_noops_1.0.0_lerobot  --repo-type dataset --local-dir playground/Datasets/LEROBOT_LIBERO_DATA/libero_object_no_noops_1.0.0_lerobot
-huggingface-cli download IPEC-COMMUNITY/libero_goal_no_noops_1.0.0_lerobot    --repo-type dataset --local-dir playground/Datasets/LEROBOT_LIBERO_DATA/libero_goal_no_noops_1.0.0_lerobot
-huggingface-cli download IPEC-COMMUNITY/libero_10_no_noops_1.0.0_lerobot      --repo-type dataset --local-dir playground/Datasets/LEROBOT_LIBERO_DATA/libero_10_no_noops_1.0.0_lerobot
+huggingface-cli download IPEC-COMMUNITY/libero_spatial_no_noops_1.0.0_lerobot --repo-type dataset --local-dir playground/Datasets/libero/libero_spatial_no_noops_1.0.0_lerobot
+huggingface-cli download IPEC-COMMUNITY/libero_object_no_noops_1.0.0_lerobot  --repo-type dataset --local-dir playground/Datasets/libero/libero_object_no_noops_1.0.0_lerobot
+huggingface-cli download IPEC-COMMUNITY/libero_goal_no_noops_1.0.0_lerobot    --repo-type dataset --local-dir playground/Datasets/libero/libero_goal_no_noops_1.0.0_lerobot
+huggingface-cli download IPEC-COMMUNITY/libero_10_no_noops_1.0.0_lerobot      --repo-type dataset --local-dir playground/Datasets/libero/libero_10_no_noops_1.0.0_lerobot
 
 # Copy modality.json to each subset
-for d in playground/Datasets/LEROBOT_LIBERO_DATA/*/; do
+for d in playground/Datasets/libero/*/; do
   cp examples/LIBERO/train_files/modality.json "$d/meta/"
 done
 ```
@@ -105,7 +106,7 @@ After this step, your `playground/Datasets/` should look like:
 
 ```
 playground/Datasets/
-├── LEROBOT_LIBERO_DATA/
+├── libero/
 │   ├── libero_spatial_no_noops_1.0.0_lerobot/
 │   │   ├── meta/
 │   │   │   ├── modality.json        ← required
@@ -182,7 +183,7 @@ datasets:
 
   vla_data:                       # Robot action data
     dataset_py: lerobot_datasets
-    data_root_dir: playground/Datasets/LEROBOT_LIBERO_DATA
+    data_root_dir: playground/Datasets/libero
     data_mix: libero_all          # all 4 suites; use "libero_goal" for single suite
     per_device_batch_size: 16
 ```
@@ -233,9 +234,9 @@ Framework_name=QwenOFT              # QwenOFT | QwenFAST | QwenPI | QwenGR00T
 freeze_module_list=''               # e.g. 'qwen_vl' to freeze VLM backbone
 base_vlm=playground/Pretrained_models/Qwen3-VL-4B-Instruct
 config_yaml=./examples/LIBERO/train_files/starvla_cotrain_libero.yaml
-libero_data_root=playground/Datasets/LEROBOT_LIBERO_DATA
+libero_data_root=playground/Datasets/libero
 data_mix=libero_all                 # or libero_goal for single suite
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 run_id=my_first_libero_run          # unique experiment name
 ###########################################################################################
 ```
@@ -265,7 +266,7 @@ bash examples/LIBERO/train_files/run_libero_train.sh
 
 ### What to expect
 
-- Checkpoints are saved to `results/Checkpoints/{run_id}/checkpoints/`
+- Checkpoints are saved to `playground/Checkpoints/{run_id}/checkpoints/`
 - Training logs go to W&B (set `WANDB_MODE=disabled` to skip)
 - The script copies itself to the output directory for reproducibility
 - With 8× A100/H800 GPUs, training on `libero_all` takes roughly 30K steps (~10 epochs)
@@ -346,7 +347,7 @@ bash examples/LIBERO/eval_files/eval_libero.sh
 - Videos are saved under `results/{task_suite}/{checkpoint_name}/`
 - Success rates are printed at the end
 
-> **Tip:** To evaluate your own trained checkpoint, just point `CKPT` to your checkpoint under `results/Checkpoints/{run_id}/checkpoints/steps_XXXXX_pytorch_model.pt`.
+> **Tip:** To evaluate your own trained checkpoint, just point `CKPT` to your checkpoint under `playground/Checkpoints/{run_id}/checkpoints/steps_XXXXX_pytorch_model.pt`.
 
 ---
 

@@ -14,13 +14,13 @@ base_port=6350
 ########### Environment setup — adapted for HKUST cluster ###########
 
 MODEL_PATH=$1
-# MODEL_PATH=/mnt/petrelfs/yejinhui/Projects/starVLA/results/Checkpoints/1120_bridge_rt_1_QwenDual_florence/checkpoints/steps_11000_pytorch_model.pt
+# MODEL_PATH=playground/Checkpoints/1120_bridge_rt_1_QwenDual_florence/checkpoints/steps_11000_pytorch_model.pt
 TSET_NUM=4 # repeat each task 4 times
 run_count=0
 
 if [ -z "$MODEL_PATH" ]; then
   echo "❌ MODEL_PATH not provided as the first argument; using default"
-  export MODEL_PATH="/mnt/petrelfs/yejinhui/Projects/starVLA/results/Checkpoints/1007_qwenLargefm/checkpoints/steps_20000_pytorch_model.pt"
+  export MODEL_PATH="playground/Checkpoints/1007_qwenLargefm/checkpoints/steps_20000_pytorch_model.pt"
 fi
 
 ckpt_path=${MODEL_PATH}

@@ -21,7 +21,7 @@ Usage:
     export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
     CUDA_VISIBLE_DEVICES=1 python examples/Gemma4/eval_libero_local.py \
-      --ckpt results/Checkpoints/gemma4_e2b_pi_libero_all_R002d/checkpoints/steps_50000_pytorch_model.pt \
+      --ckpt playground/Checkpoints/gemma4_e2b_pi_libero_all_R002d/checkpoints/steps_50000_pytorch_model.pt \
       --task-suite libero_goal --num-trials 5
 """
 

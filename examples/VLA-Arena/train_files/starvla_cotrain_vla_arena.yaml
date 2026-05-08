@@ -1,5 +1,5 @@
 run_id: starvla_vla_arena
-run_root_dir: results/Checkpoints
+run_root_dir: playground/Checkpoints
 seed: 42
 wandb_entity: your_wandb_entity
 wandb_project: starVLA_VLA_Arena
@@ -59,7 +59,7 @@ datasets:
   vla_data:
     dataset_py: lerobot_datasets
     include_state: false
-    data_root_dir: playground/Datasets/VLA_ARENA_LEROBOT_DATA
+    data_root_dir: playground/Datasets/vla_arena
     data_mix: vla_arena_L0_L    # see starVLA/dataloader/gr00t_lerobot/mixtures.py
     action_type: delta_eef        # 7-DOF delta EEF (pos + rotation + gripper)
     sequential_step_sampling: false

@@ -15,7 +15,7 @@ MODEL_PATH=$1
 # Optional: allow overriding via argument
 if [ -z "$MODEL_PATH" ]; then
   echo "❌ MODEL_PATH not provided as the first argument; using default"
-  export MODEL_PATH="/mnt/petrelfs/yejinhui/Projects/llavavla/results/Checkpoints/1017_QwenOFT/checkpoints/steps_65000_pytorch_model.pt"
+  export MODEL_PATH="playground/Checkpoints/1017_QwenOFT/checkpoints/steps_65000_pytorch_model.pt"
 fi
 
 export ckpt_path=${MODEL_PATH}

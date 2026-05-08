@@ -9,6 +9,7 @@ import socket
 
 from deployment.model_server.policy_wrapper import PolicyServerWrapper
 from deployment.model_server.tools.websocket_policy_server import WebsocketPolicyServer
+from starVLA.path_tool import maybe_resolve_path
 
 
 def main(args) -> None:
@@ -19,7 +20,7 @@ def main(args) -> None:
     and consume already-unnormalized actions from the response.
     """
     wrapper = PolicyServerWrapper(
-        ckpt_path=args.ckpt_path,
+        ckpt_path=maybe_resolve_path(args.ckpt_path),
         device="cuda",
         use_bf16=args.use_bf16,
     )

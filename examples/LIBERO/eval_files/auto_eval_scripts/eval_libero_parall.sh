@@ -1,19 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
 ###########################################################################################
 # === Please modify the following paths according to your environment ===
-export LIBERO_HOME=/home/jye624/Projcets/LIBERO  # Root directory of the LIBERO project
-export LIBERO_python=/home/jye624/.conda/envs/libero/bin/python  # Path to the Python environment
-export starVLA_python=/home/jye624/.conda/envs/starVLA/bin/python  # Path to the Python environment
+export LIBERO_HOME=${LIBERO_HOME:-${REPO_ROOT}/../LIBERO}  # Root directory of the LIBERO project
+export LIBERO_python="${LIBERO_PYTHON:-python}"  # Path to the Python environment
+export starVLA_python="${STARVLA_PYTHON:-python}"  # Path to the Python environment
 
 # === End of environment variable configuration ===
 export LIBERO_CONFIG_PATH=${LIBERO_HOME}/libero  # Path to LIBERO configuration files
-export PYTHONPATH=$PYTHONPATH:${LIBERO_HOME} # let eval_libero find the LIBERO tools
-export PYTHONPATH=$(pwd):${PYTHONPATH} # let LIBERO find the websocket tools from starVLA repo
+export PYTHONPATH="${LIBERO_HOME}:${REPO_ROOT}:${PYTHONPATH:-}" # let eval_libero find the LIBERO tools
 ###########################################################################################
 
 
 
 ##### === variables for which evaluation to setup ===
-your_ckpt=$1 # results/Checkpoints/.../steps_20000_pytorch_model.pt
+your_ckpt=$1 # playground/Checkpoints/.../steps_20000_pytorch_model.pt
 task_suite_name=$2 # align with your model | libero_goal
 gpu_id=$3   # GPU id to use (e.g. 0, 1, 2, ...)
 base_port=$4 # unique port for this eval instance

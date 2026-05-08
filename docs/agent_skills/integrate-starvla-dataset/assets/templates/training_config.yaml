@@ -3,7 +3,7 @@
 #
 # CLI overrides this file:  --trainer.learning_rate.base 1e-4
 run_id: starvla_<<TODO_FRAMEWORK>>_<<TODO_BENCH>>_smoke
-run_root_dir: results/Checkpoints
+run_root_dir: playground/Checkpoints
 seed: 42
 wandb_entity: your_wandb_entity
 wandb_project: starVLA_<<TODO_BENCH>>

@@ -1,6 +1,11 @@
 #!/bin/bash
 # Install LIBERO environment for evaluation
-set -e
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
 
 echo "=== Step 1: Activate libero conda env ==="
 eval "$(conda shell.bash hook)"
@@ -10,14 +15,15 @@ echo "=== Step 2: Install mujoco ==="
 pip install mujoco==3.2.3
 
 echo "=== Step 3: Clone and install LIBERO ==="
-LIBERO_DIR=/home/jye624/Projcets/LIBERO
+LIBERO_DIR="${LIBERO_DIR:-${REPO_ROOT}/../LIBERO}"
 if [ ! -d "$LIBERO_DIR" ]; then
-    cd /home/jye624/Projcets
-    git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git
-    cd LIBERO
+    mkdir -p "$(dirname "$LIBERO_DIR")"
+    cd "$(dirname "$LIBERO_DIR")"
+    git clone https://github.com/Lifelong-Robot-Learning/LIBERO.git "$(basename "$LIBERO_DIR")"
+    cd "$LIBERO_DIR"
 else
     echo "LIBERO already cloned at $LIBERO_DIR"
-    cd $LIBERO_DIR
+    cd "$LIBERO_DIR"
 fi
 
 echo "=== Step 4: Install LIBERO (editable) ==="

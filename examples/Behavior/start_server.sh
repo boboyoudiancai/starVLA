@@ -1,4 +1,11 @@
 #!/bin/bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
 
 # Debug: Print the current Python environment
 echo "Using Python: $(which python)"
@@ -6,16 +13,16 @@ echo "Using Python: $(which python)"
 ### MANUALLY SET THESE ###
 
 # set necessary environment variables
-export star_vla_python=/opt/conda/envs/starVLA/bin/python
-export sim_python=/opt/conda/envs/behavior/bin/python
-export BEHAVIOR_ASSET_PATH=/workspace/llavavla0/BEHAVIOR-1K/datasets
-export PYTHONPATH=$(pwd):${PYTHONPATH}
+export star_vla_python="${STARVLA_PYTHON:-python}"
+export sim_python="${SIM_PYTHON:-python}"
+export BEHAVIOR_ASSET_PATH="${BEHAVIOR_ASSET_PATH:-playground/Datasets/behavior-1k}"
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
 
 
 
 # set model path and port
-MODEL_PATH="/workspace/llavavla0/playground/Checkpoints/BEHAVIOR-QwenDual-Pretrained-224/checkpoints/steps_300000_pytorch_model.pt"
-PORT=10197
+MODEL_PATH="${CKPT:-playground/Checkpoints/BEHAVIOR-QwenDual-Pretrained-224/checkpoints/steps_300000_pytorch_model.pt}"
+PORT="${PORT:-10197}"
 WRAPPERS="DefaultWrapper"
 USE_STATE=True  # whether to use state as part of the observation
 

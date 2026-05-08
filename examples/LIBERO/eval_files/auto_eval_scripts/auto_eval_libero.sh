@@ -1,7 +1,12 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-cd /home/jye624/Projcets/starVLA
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
 SCRIPT_PATH="./examples/LIBERO/eval_files/auto_eval_scripts/eval_libero_parall.sh"
 
 ###############################################################################
@@ -9,7 +14,7 @@ SCRIPT_PATH="./examples/LIBERO/eval_files/auto_eval_scripts/eval_libero_parall.s
 ###############################################################################
 
 # --- Checkpoint directory (all .pt files inside will be evaluated) ---
-CKPT_DIR="results/Checkpoints/0415_libero4in1_WanOFT/checkpoints"
+CKPT_DIR="playground/Checkpoints/0415_libero4in1_WanOFT/checkpoints"
 
 # --- Or specify an explicit list (overrides CKPT_DIR when non-empty) ---
 CKPT_LIST=(
@@ -93,4 +98,3 @@ for ((i=0; i<num_gpus; i++)); do
     echo "   GPU ${GPU_LIST[$i]}: ${gpu_job_count[$i]} jobs"
 done
 echo "=========================================="
-

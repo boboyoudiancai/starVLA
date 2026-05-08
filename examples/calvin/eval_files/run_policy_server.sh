@@ -1,9 +1,17 @@
 #!/bin/bash
-export PYTHONPATH=$(pwd):${PYTHONPATH} # let LIBERO find the websocket tools from main repo
-export star_vla_python=/mnt/data/miniconda3/envs/starvla/bin/python
-your_ckpt=results/Checkpoints/0118_starvla_qwenpi_calvin_task_D_D/checkpoints/steps_30000_pytorch_model.pt
-gpu_id=0
-port=5694
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
+
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
+export star_vla_python="${STARVLA_PYTHON:-python}"
+your_ckpt="${CKPT:-playground/Checkpoints/0118_starvla_qwenpi_calvin_task_D_D/checkpoints/steps_30000_pytorch_model.pt}"
+gpu_id="${GPU_ID:-0}"
+port="${PORT:-5694}"
 ################# star Policy Server ######################
 
 # export DEBUG=true

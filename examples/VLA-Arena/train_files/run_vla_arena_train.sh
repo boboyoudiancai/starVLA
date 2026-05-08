@@ -31,7 +31,7 @@ base_vlm=playground/Pretrained_models/Qwen2.5-VL-3B-Instruct
 config_yaml=./examples/VLA-Arena/train_files/starvla_cotrain_vla_arena.yaml
 
 # Root of your VLA-Arena LeRobot dataset (contains suite sub-directories)
-vla_arena_data_root=playground/Datasets/VLA_ARENA_LEROBOT_DATA
+vla_arena_data_root=playground/Datasets/vla_arena
 
 # Which data mix to use (see starVLA/dataloader/gr00t_lerobot/mixtures.py)
 #   vla_arena_L0_S        – small split
@@ -39,7 +39,7 @@ vla_arena_data_root=playground/Datasets/VLA_ARENA_LEROBOT_DATA
 #   vla_arena_L0_L        – large split
 data_mix=vla_arena_L0_L
 
-run_root_dir=./results/Checkpoints
+run_root_dir=playground/Checkpoints
 run_id=vla_arena_qwenoft_all
 # ---------------------------------------------------------------------------
 

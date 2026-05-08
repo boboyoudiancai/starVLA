@@ -1,18 +1,17 @@
 #!/bin/bash
-export PYTHONPATH=$(pwd):${PYTHONPATH} # let LIBERO find the websocket tools from main repo
-# === Paths (adapted for this cluster) ===
-STARVLA_DIR=/home/jye624/Projcets/starVLA
-LIBERO_HOME=/home/jye624/Projcets/LIBERO
-STARVLA_PYTHON=/home/jye624/.conda/envs/starVLA/bin/python
-LIBERO_PYTHON=/home/jye624/.conda/envs/libero/bin/python
+set -euo pipefail
 
-# === Checkpoint ===
-CKPT=${STARVLA_DIR}/playground/Pretrained_models/StarVLA/Qwen3-VL-OFT-LIBERO-4in1/checkpoints/steps_50000_pytorch_model.pt
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_GIT_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
+source "${REPO_GIT_ROOT}/.starvla.env"
+cd "${REPO_ROOT}"
+python3 starVLA/path_tool.py setup-links >/dev/null
 
-export star_vla_python=${STARVLA_PYTHON}
-your_ckpt=${CKPT}   
-gpu_id=0
-port=6694
+export PYTHONPATH="${REPO_ROOT}:${PYTHONPATH:-}"
+export star_vla_python="${STARVLA_PYTHON:-python}"
+your_ckpt="${CKPT:-playground/Pretrained_models/StarVLA/Qwen3-VL-OFT-LIBERO-4in1/checkpoints/steps_50000_pytorch_model.pt}"
+gpu_id="${GPU_ID:-0}"
+port="${PORT:-6694}"
 ################# star Policy Server ######################
 
 # export DEBUG=true
