@@ -217,7 +217,22 @@ class Qwenvl_Fast(baseframework):
         # --- map index to fast tokenizer index space ---
         batch_fast_action_token_idx = self._decode_action_tokens(batch_vlm_action_token_ids)
         # --- decode fast tokenizer index to action semantic ---
-        normalized_actions = self.action_model.fast_tokenizer.decode(batch_fast_action_token_idx)
+        normalized_actions = []
+        action_horizon = int(self.config.framework.action_model.action_horizon)
+        action_dim = int(self.config.framework.action_model.action_dim)
+        zero_action = np.zeros((action_horizon, action_dim), dtype=np.float32)
+        for seq in batch_fast_action_token_idx:
+            if not seq:
+                normalized_actions.append(zero_action.copy())
+                continue
+            try:
+                decoded = self.action_model.fast_tokenizer.decode([seq])
+                if isinstance(decoded, list) and len(decoded) > 0:
+                    normalized_actions.append(np.asarray(decoded[0]))
+                else:
+                    normalized_actions.append(np.asarray(decoded))
+            except Exception:
+                normalized_actions.append(zero_action.copy())
 
         return {"normalized_actions": normalized_actions}
 
@@ -254,7 +269,7 @@ class Qwenvl_Fast(baseframework):
         batch_fast_token_ids = []
         for seq in batch_vlm_tokens:
             if not seq:
-                batch_fast_token_ids.append(None)
+                batch_fast_token_ids.append([])
                 continue
             fast_ids = [t - act_min for t in seq]
 

@@ -38,9 +38,7 @@ from starVLA.model.framework.share_tools import apply_config_compat
 from starVLA.training.trainer_utils.config_tracker import AccessTrackedConfig, wrap_config
 from starVLA.training.trainer_utils.trainer_tools import TrainerUtils, build_param_lr_groups, setup_optimizer_and_scheduler, normalize_dotlist_args
 
-deepspeed_plugin = DeepSpeedPlugin()
-accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin)
-accelerator.print(accelerator.state)
+accelerator = None
 
 # Sane Defaults
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -115,6 +113,8 @@ class VLATrainer(TrainerUtils):
 
         self.completed_steps = 0
         self.total_batch_size = self._calculate_total_batch_size()
+        self.grad_accum_steps = max(1, int(getattr(self.config.trainer, "gradient_accumulation_steps", 1)))
+        self.micro_step = 0
 
     def prepare_training(self):
         rank = dist.get_rank() if dist.is_initialized() else 0
@@ -307,10 +307,10 @@ class VLATrainer(TrainerUtils):
             t_end_data = time.perf_counter()
 
             t_start_model = time.perf_counter()
-            step_metrics = self._train_step(batch_vla)
+            step_metrics, did_optimizer_step = self._train_step(batch_vla)
             t_end_model = time.perf_counter()
 
-            if self.accelerator.sync_gradients:
+            if did_optimizer_step:
                 progress_bar.update(1)
                 self.completed_steps += 1
 
@@ -367,31 +367,25 @@ class VLATrainer(TrainerUtils):
 
     def _train_step(self, batch_vla, batch_vlm=None):
         """Execute single training step."""
-        with self.accelerator.accumulate(self.model):
+        if self.micro_step % self.grad_accum_steps == 0:
             self.optimizer.zero_grad()
 
-            with torch.autocast("cuda", dtype=torch.bfloat16):
-                output_dict = self.model.forward(batch_vla)
-                action_loss = output_dict["action_loss"]
-                total_loss = action_loss
+        with torch.autocast("cuda", dtype=torch.bfloat16):
+            output_dict = self.model.forward(batch_vla)
+            action_loss = output_dict["action_loss"]
+            total_loss = action_loss / self.grad_accum_steps
 
-            self.accelerator.backward(total_loss)
+        self.accelerator.backward(total_loss)
+        self.micro_step += 1
+        did_optimizer_step = (self.micro_step % self.grad_accum_steps == 0)
 
+        if did_optimizer_step:
             if self.config.trainer.gradient_clipping is not None:
                 self.accelerator.clip_grad_norm_(self.model.parameters(), self.config.trainer.gradient_clipping)
-
             self.optimizer.step()
-            # Only step the LR scheduler when gradients are actually synced
-            # (i.e., not mid-accumulation). Without this guard the scheduler
-            # runs gradient_accumulation_steps times faster than intended,
-            # causing warmup to end too early and cosine decay to bottom out
-            # at min_lr well before max_train_steps is reached.
-            if self.accelerator.sync_gradients:
-                self.lr_scheduler.step()
+            self.lr_scheduler.step()
 
-        return {
-            "action_dit_loss": action_loss.item(),
-        }
+        return {"action_dit_loss": action_loss.item()}, did_optimizer_step
 
     def _finalize_training(self):
         """Training end processing."""
@@ -418,6 +412,11 @@ class VLATrainer(TrainerUtils):
 
 def main(cfg) -> None:
     logger.info("VLA Training :: Warming Up")
+    global accelerator
+    grad_acc_steps = int(getattr(cfg.trainer, "gradient_accumulation_steps", 1))
+    deepspeed_plugin = DeepSpeedPlugin()
+    accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin, gradient_accumulation_steps=grad_acc_steps)
+    accelerator.print(accelerator.state)
 
     cfg = wrap_config(cfg)
     logger.info("✅ Configuration wrapped for access tracking")
