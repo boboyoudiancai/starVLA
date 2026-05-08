@@ -110,7 +110,8 @@ def derived_paths() -> Dict[str, Path]:
         "repo_root": repo,
         "data_root": storage,
         "datasets_dir": storage / "data",
-        "models_dir": storage / "models",
+        "models_root_dir": storage / "models",
+        "models_dir": storage / "models" / "models",
         "checkpoints_dir": storage / "models" / "checkpoints",
         "playground_dir": playground,
         "playground_datasets": playground / "Datasets",
@@ -217,13 +218,28 @@ def _migrate_directory_contents(src: Path, dst: Path) -> None:
         pass
 
 
+def _migrate_model_dirs(models_root: Path, models_dir: Path, checkpoints_dir: Path) -> None:
+    models_root.mkdir(parents=True, exist_ok=True)
+    models_dir.mkdir(parents=True, exist_ok=True)
+    checkpoints_dir.mkdir(parents=True, exist_ok=True)
+
+    for entry in list(models_root.iterdir()):
+        if entry.name in {"models", "checkpoints"}:
+            continue
+        target = models_dir / entry.name
+        if target.exists():
+            continue
+        shutil.move(str(entry), str(target))
+
+
 def setup_links(*, dry_run: bool = False) -> None:
     paths = derived_paths()
     repo = paths["repo_root"]
     playground = paths["playground_dir"]
     playground.mkdir(parents=True, exist_ok=True)
     paths["datasets_dir"].mkdir(parents=True, exist_ok=True)
-    paths["models_dir"].mkdir(parents=True, exist_ok=True)
+    paths["models_root_dir"].mkdir(parents=True, exist_ok=True)
+    _migrate_model_dirs(paths["models_root_dir"], paths["models_dir"], paths["checkpoints_dir"])
     paths["checkpoints_dir"].mkdir(parents=True, exist_ok=True)
     paths["results_storage_dir"].mkdir(parents=True, exist_ok=True)
 
