@@ -29,7 +29,7 @@ datasets:
     min_pixels: 784
     model_max_length: 2048
     model_type: qwen3vl
-    per_device_batch_size: 4
+    per_device_batch_size: 10
 
   vla_data:
     dataset_py: lerobot_datasets

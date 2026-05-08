@@ -1,5 +1,5 @@
-export CUDA_VISIBLE_DEVICES=0,2,5,7
-export NCCL_SOCKET_IFNAME=lo
+export CUDA_VISIBLE_DEVICES=0,1,2
+export NCCL_SOCKET_IFNAME=eno1
 unset NCCL_IB_HCA
 
 # used for check save when communication
@@ -40,13 +40,13 @@ accelerate launch \
   --framework.qwenvl.base_vlm ${base_vlm} \
   --datasets.vla_data.data_root_dir ${libero_data_root} \
   --datasets.vla_data.data_mix ${data_mix} \
-  --datasets.vla_data.per_device_batch_size 8 \
+  --datasets.vla_data.per_device_batch_size 6 \
   --trainer.vla_data.video_backend torchvision_av \
   --trainer.freeze_modules ${freeze_module_list} \
   --trainer.max_train_steps 80000 \
   --trainer.save_interval 10000 \
   --trainer.logging_frequency 100 \
-  --trainer.eval_interval 100 \
+  --trainer.eval_interval 1000 \
   --run_root_dir ${run_root_dir} \
   --run_id ${run_id} \
   --wandb_project starVLA_Libero \

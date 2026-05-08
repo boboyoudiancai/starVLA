@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-export NCCL_SOCKET_IFNAME=lo
+export NCCL_SOCKET_IFNAME=eno1
 unset NCCL_IB_HCA
 
 # used to abort on hung collectives

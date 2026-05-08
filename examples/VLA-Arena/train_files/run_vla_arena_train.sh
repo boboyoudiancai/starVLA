@@ -14,7 +14,7 @@
 # ---------------------------------------------------------------------------
 # NCCL settings (adjust for your cluster network interface)
 # ---------------------------------------------------------------------------
-export NCCL_SOCKET_IFNAME=lo
+export NCCL_SOCKET_IFNAME=eno1
 unset NCCL_IB_HCA
 export TORCH_NCCL_BLOCKING_WAIT=1
 export TORCH_NCCL_ASYNC_ERROR_HANDLING=1

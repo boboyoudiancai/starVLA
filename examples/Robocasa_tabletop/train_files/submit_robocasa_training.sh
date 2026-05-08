@@ -22,7 +22,7 @@
 
 export NCCL_TIMEOUT=10000  # timeout set to 1 hour (unit: seconds)
 export NCCL_SOCKET_TIMEOUT_MS=360000
-export NCCL_SOCKET_IFNAME=lo
+export NCCL_SOCKET_IFNAME=eno1
 # export NCCL_IB_HCA=mlx5_2,mlx5_3,mlx5_4,mlx5_5
 unset NCCL_IB_HCA
 

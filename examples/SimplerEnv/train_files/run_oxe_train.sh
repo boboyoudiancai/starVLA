@@ -1,4 +1,4 @@
-export NCCL_SOCKET_IFNAME=lo
+export NCCL_SOCKET_IFNAME=eno1
 unset NCCL_IB_HCA
 
 # used for check save when communication

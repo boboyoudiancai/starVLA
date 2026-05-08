@@ -12,7 +12,7 @@
 set -e
 
 # -------------------- NCCL / Networking --------------------
-export NCCL_SOCKET_IFNAME=lo
+export NCCL_SOCKET_IFNAME=eno1
 # For multi-node, list all available mlx5 interfaces for stability (adjust for your cluster)
 unset NCCL_IB_HCA
 
