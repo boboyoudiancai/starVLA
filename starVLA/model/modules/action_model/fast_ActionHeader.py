@@ -70,10 +70,13 @@ class Fast_Action_Tokenizer(nn.Module):
 
     def __init__(self, fast_tokenizer_name="playground/Pretrained_models/fast"):
         super().__init__()
-
-        self.fast_tokenizer = AutoProcessor.from_pretrained(
-            fast_tokenizer_name, trust_remote_code=True
-        )  # load https://huggingface.co/physical-intelligence/fast
+        tokenizer_source = fast_tokenizer_name
+        if isinstance(tokenizer_source, str) and tokenizer_source.startswith(("./", "/", "../")):
+            tokenizer_source = os.path.abspath(tokenizer_source)
+        if isinstance(tokenizer_source, str) and os.path.exists(tokenizer_source):
+            self.fast_tokenizer = AutoProcessor.from_pretrained(tokenizer_source, trust_remote_code=True)
+        else:
+            self.fast_tokenizer = _load_fast_processor("physical-intelligence/fast")
 
     def encoder_action2fastoken(self, raw_actions):
         # x: (batch_size, chunck, dim)

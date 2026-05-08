@@ -22,11 +22,9 @@
 
 export NCCL_TIMEOUT=10000  # timeout set to 1 hour (unit: seconds)
 export NCCL_SOCKET_TIMEOUT_MS=360000
-
-
-export NCCL_SOCKET_IFNAME=bond0
+export NCCL_SOCKET_IFNAME=lo
 # export NCCL_IB_HCA=mlx5_2,mlx5_3,mlx5_4,mlx5_5
-export NCCL_IB_HCA=mlx5_2,mlx5_3
+unset NCCL_IB_HCA
 
 export GPUS_PER_NODE=8
 export MASTER_ADDR=$(scontrol show hostnames $SLURM_JOB_NODELIST | head -n 1)

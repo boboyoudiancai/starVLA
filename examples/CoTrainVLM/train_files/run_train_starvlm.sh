@@ -1,7 +1,5 @@
-
-
-export NCCL_SOCKET_IFNAME=bond0
-export NCCL_IB_HCA=mlx5_2,mlx5_3
+export NCCL_SOCKET_IFNAME=lo
+unset NCCL_IB_HCA
 
 # used for check save when communication
 export NCCL_BLOCKING_WAIT=1
