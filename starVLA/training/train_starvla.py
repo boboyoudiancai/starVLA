@@ -39,8 +39,7 @@ from starVLA.training.trainer_utils.config_tracker import AccessTrackedConfig, w
 from starVLA.training.trainer_utils.trainer_tools import TrainerUtils, build_param_lr_groups, setup_optimizer_and_scheduler, normalize_dotlist_args
 
 deepspeed_plugin = DeepSpeedPlugin()
-accelerator = Accelerator(deepspeed_plugin=deepspeed_plugin)
-accelerator.print(accelerator.state)
+accelerator = None
 
 # Sane Defaults
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -417,6 +416,14 @@ class VLATrainer(TrainerUtils):
 
 
 def main(cfg) -> None:
+    global accelerator
+    grad_acc_steps = int(getattr(cfg.trainer, "gradient_accumulation_steps", 1))
+    accelerator = Accelerator(
+        deepspeed_plugin=deepspeed_plugin,
+        gradient_accumulation_steps=grad_acc_steps,
+    )
+    accelerator.print(accelerator.state)
+
     logger.info("VLA Training :: Warming Up")
 
     cfg = wrap_config(cfg)

@@ -1,5 +1,4 @@
-
-export CUDA_VISIBLE_DEVICES=0,1,2,5
+export CUDA_VISIBLE_DEVICES=0,2,5,7
 export NCCL_SOCKET_IFNAME=lo
 unset NCCL_IB_HCA
 
@@ -22,7 +21,7 @@ run_id=QwenFAST_Libero_Qwen3-4B
 ###########################################################################################
 
 
-# export WANDB_MODE=disabled
+export WANDB_MODE=disabled
 
 output_dir=${run_root_dir}/${run_id}
 mkdir -p ${output_dir}
@@ -41,7 +40,7 @@ accelerate launch \
   --framework.qwenvl.base_vlm ${base_vlm} \
   --datasets.vla_data.data_root_dir ${libero_data_root} \
   --datasets.vla_data.data_mix ${data_mix} \
-  --datasets.vla_data.per_device_batch_size 16 \
+  --datasets.vla_data.per_device_batch_size 8 \
   --trainer.vla_data.video_backend torchvision_av \
   --trainer.freeze_modules ${freeze_module_list} \
   --trainer.max_train_steps 80000 \
@@ -51,7 +50,6 @@ accelerate launch \
   --run_root_dir ${run_root_dir} \
   --run_id ${run_id} \
   --wandb_project starVLA_Libero \
-  --wandb_entity 2351563 \
   # --is_debug True
 
 
