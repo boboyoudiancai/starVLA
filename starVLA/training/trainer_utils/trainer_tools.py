@@ -246,6 +246,66 @@ class TrainerUtils:
         return num_params, num_trainable_params
 
     @staticmethod
+    def _has_zero3_partitioned_params(model):
+        return any(hasattr(param, "ds_id") for param in model.parameters())
+
+    @staticmethod
+    def _load_zero3_partitioned_state_dict(model, checkpoint):
+        """Load a full state_dict into a ZeRO-3 partitioned model.
+
+        DeepSpeed ZeRO-3 can leave non-owned parameters as zero-sized tensors on
+        each rank, so a normal load_state_dict() reports size mismatches. Gather
+        and copy one parameter at a time so DeepSpeed can re-partition it.
+        """
+        import deepspeed
+
+        rank = dist.get_rank() if dist.is_initialized() else 0
+        errors = []
+        loaded = 0
+        checkpoint_keys = set(checkpoint.keys())
+        model_keys = set()
+
+        for name, param in model.named_parameters():
+            model_keys.add(name)
+            tensor = checkpoint.get(name)
+            if tensor is None:
+                continue
+
+            with deepspeed.zero.GatheredParameters([param], modifier_rank=0):
+                if rank == 0:
+                    if tuple(param.shape) != tuple(tensor.shape):
+                        errors.append(f"{name}: checkpoint {tuple(tensor.shape)} != model {tuple(param.shape)}")
+                        continue
+                    param.data.copy_(tensor.to(device=param.device, dtype=param.dtype))
+                    loaded += 1
+
+        for name, buffer in model.named_buffers():
+            model_keys.add(name)
+            tensor = checkpoint.get(name)
+            if tensor is None:
+                continue
+            if tuple(buffer.shape) != tuple(tensor.shape):
+                if rank == 0:
+                    errors.append(f"{name}: checkpoint {tuple(tensor.shape)} != model {tuple(buffer.shape)}")
+                continue
+            buffer.data.copy_(tensor.to(device=buffer.device, dtype=buffer.dtype))
+
+        if dist.is_initialized():
+            error_payload = [errors]
+            dist.broadcast_object_list(error_payload, src=0)
+            errors = error_payload[0]
+
+        if errors:
+            preview = "\n".join(errors[:20])
+            raise RuntimeError(f"ZeRO-3 checkpoint shape mismatch:\n{preview}")
+
+        if rank == 0:
+            unexpected = sorted(checkpoint_keys - model_keys)
+            print(f"✅ loaded ZeRO-3 partitioned model parameters ({loaded} tensors)")
+            if unexpected:
+                print(f"⚠️ unexpected checkpoint keys ignored: {len(unexpected)}")
+
+    @staticmethod
     def load_pretrained_backbones(model, checkpoint_path=None, reload_modules=None):
         """
         load checkpoint:
@@ -292,7 +352,10 @@ class TrainerUtils:
                     print(f"❌ cannot find module path: {path}")
         else:  # full load
             try:
-                model.load_state_dict(checkpoint, strict=False)
+                if TrainerUtils._has_zero3_partitioned_params(model):
+                    TrainerUtils._load_zero3_partitioned_state_dict(model, checkpoint)
+                else:
+                    model.load_state_dict(checkpoint, strict=False)
                 if dist.get_rank() == 0:
                     print("✅ loaded <full_model> model parameters")
                 loaded_modules = ["<full_model>"]
