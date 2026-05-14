@@ -153,7 +153,14 @@ class PolicyServerWrapper:
         proc = self._get_processor(effective_key)
 
         out = self._framework.predict_action(examples=examples, **kwargs)
-        normalized = np.asarray(out["normalized_actions"])  # (B, T, D)
+        normalized = np.asarray(out["normalized_actions"])
+        # Some frameworks (observed with QwenFAST) may return a singleton
+        # extra axis, e.g. (B, 1, T, D), even though downstream expects
+        # (B, T, D). Normalize that here at the server boundary.
+        if normalized.ndim == 4 and normalized.shape[1] == 1:
+            normalized = normalized[:, 0]
+        elif normalized.ndim == 2:
+            normalized = normalized[None, ...]
 
         unnorm = np.stack(
             [proc.unapply_actions(normalized[b]) for b in range(normalized.shape[0])],
