@@ -13,7 +13,7 @@ Usage:
   $(basename "$0") <ckpt_path> [num_trials_per_task]
 
 Example:
-  $(basename "$0") playground/Checkpoints/foo/checkpoints/steps_30000_pytorch_model.pt
+  $(basename "$0") playground/Checkpoints/foo/checkpoints/steps_80000_pytorch_model.pt
 USAGE
 }
 
@@ -48,6 +48,7 @@ EVAL_ENV_NAME="${EVAL_ENV_NAME:-libero}"
 LIBERO_HOME="${LIBERO_HOME:-${REPO_ROOT}/../LIBERO}"
 LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH:-${HOME}/.libero}"
 RESULTS_ROOT="${REPO_ROOT}/results/libero"
+LOCAL_LOG_ROOT="${REPO_ROOT}/.eval4_logs/libero"
 
 find_conda_bin() {
   if [[ -n "${CONDA_EXE:-}" && -x "${CONDA_EXE}" ]]; then
@@ -79,7 +80,6 @@ if [[ -z "${CONDA_BIN_DIR}" ]]; then
   echo "cannot find conda" >&2
   exit 1
 fi
-CONDA_BIN="${CONDA_BIN_DIR}/conda"
 SERVER_PY="${CONDA_BIN_DIR}/../envs/${SERVER_ENV_NAME}/bin/python"
 EVAL_PY="${CONDA_BIN_DIR}/../envs/${EVAL_ENV_NAME}/bin/python"
 
@@ -165,10 +165,12 @@ print(f"{parts[-3]}_{parts[-2]}_{parts[-1]}")
 PY
 )"
 RUN_ROOT="${RESULTS_ROOT}/${FOLDER_NAME}"
-mkdir -p "${RUN_ROOT}"
+LOCAL_RUN_ROOT="${LOCAL_LOG_ROOT}/${FOLDER_NAME}"
+mkdir -p "${RUN_ROOT}" "${LOCAL_RUN_ROOT}"
 
 echo "ckpt=${CKPT}"
 echo "results_root=${RUN_ROOT}"
+echo "local_log_root=${LOCAL_RUN_ROOT}"
 echo "render_gpu=${RENDER_GPU}"
 
 launch_suite() {
@@ -176,7 +178,14 @@ launch_suite() {
   local server_gpu="$2"
   local port="$3"
   local out_dir="${RUN_ROOT}/${suite}"
-  mkdir -p "${out_dir}"
+  local local_out_dir="${LOCAL_RUN_ROOT}/${suite}"
+  mkdir -p "${out_dir}" "${local_out_dir}"
+
+  cat > "${out_dir}/log_paths.txt" <<TXT
+launcher.log -> ${local_out_dir}/launcher.log
+server.log -> ${local_out_dir}/server.log
+eval.log -> ${local_out_dir}/eval.log
+TXT
 
   nohup env \
     REPO_ROOT="${REPO_ROOT}" \
@@ -190,6 +199,7 @@ launch_suite() {
     RENDER_GPU="${RENDER_GPU}" \
     PORT="${port}" \
     OUT_DIR="${out_dir}" \
+    LOCAL_OUT_DIR="${local_out_dir}" \
     NUM_TRIALS_PER_TASK="${NUM_TRIALS_PER_TASK}" \
     bash -lc '
 set -euo pipefail
@@ -201,16 +211,33 @@ export MUJOCO_GL=egl
 export PYOPENGL_PLATFORM=egl
 export TORCH_FORCE_NO_WEIGHTS_ONLY_LOAD=1
 
+copy_log_if_present() {
+  local src="$1"
+  local dst="$2"
+  if [[ -f "$src" ]]; then
+    cp -f "$src" "$dst.tmp" && mv -f "$dst.tmp" "$dst"
+  fi
+}
+
+copy_logs_to_results() {
+  copy_log_if_present "${LOCAL_OUT_DIR}/launcher.log" "${OUT_DIR}/launcher.log"
+  copy_log_if_present "${LOCAL_OUT_DIR}/server.log" "${OUT_DIR}/server.log"
+  copy_log_if_present "${LOCAL_OUT_DIR}/eval.log" "${OUT_DIR}/eval.log"
+}
+
+exec >"${LOCAL_OUT_DIR}/launcher.log" 2>&1
+
 echo "$(date -Iseconds) launcher start suite=${SUITE} server_gpu=${SERVER_GPU} render_gpu=${RENDER_GPU} port=${PORT} ckpt=${CKPT} out=${OUT_DIR}"
 CUDA_VISIBLE_DEVICES="${SERVER_GPU}" "${SERVER_PY}" deployment/model_server/server_policy.py \
   --ckpt_path "${CKPT}" \
   --port "${PORT}" \
   --use_bf16 \
-  >"${OUT_DIR}/server.log" 2>&1 &
+  >"${LOCAL_OUT_DIR}/server.log" 2>&1 &
 SERVER_PID=$!
 echo "${SERVER_PID}" > "${OUT_DIR}/server.pid"
 cleanup() {
   kill "${SERVER_PID}" 2>/dev/null || true
+  copy_logs_to_results || true
 }
 trap cleanup EXIT
 
@@ -248,12 +275,13 @@ MUJOCO_EGL_DEVICE_ID="${RENDER_GPU}" "${EVAL_PY}" ./examples/LIBERO/eval_files/e
   --args.task-suite-name "${SUITE}" \
   --args.num-trials-per-task "${NUM_TRIALS_PER_TASK}" \
   --args.video-out-path "${OUT_DIR}" \
-  >"${OUT_DIR}/eval.log" 2>&1
+  >"${LOCAL_OUT_DIR}/eval.log" 2>&1
 STATUS=$?
 echo "${STATUS}" > "${OUT_DIR}/eval.exitcode"
 echo "$(date -Iseconds) eval exit suite=${SUITE} status=${STATUS}"
+copy_logs_to_results
 exit "${STATUS}"
-' >"${out_dir}/launcher.log" 2>&1 < /dev/null &
+' > /dev/null 2>&1 < /dev/null &
 
   local launch_pid=$!
   echo "${launch_pid}" > "${out_dir}/launcher.pid"
