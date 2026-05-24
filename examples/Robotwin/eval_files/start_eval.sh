@@ -2,6 +2,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
 
 ROBOTWIN_ALL_TASKS=(
     adjust_bottle
@@ -215,6 +216,20 @@ wait_for_server() {
     return 1
 }
 
+wait_for_port_release() {
+    local port="$1"
+    local timeout_s="${2:-30}"
+    local elapsed=0
+    while (( elapsed < timeout_s )); do
+        if ! port_in_use "${port}"; then
+            return 0
+        fi
+        sleep 1
+        elapsed=$((elapsed + 1))
+    done
+    return 1
+}
+
 detect_cuda_devices() {
     local -a devices=()
     local -a cleaned=()
@@ -349,8 +364,16 @@ launch_task_in_slot() {
     local task_name="$2"
     local gpu_id="${SLOT_GPUS[$slot_idx]}"
     local port="${SLOT_PORTS[$slot_idx]}"
+    local original_port="${port}"
     local launched_pid=""
     local task_safe="${task_name//\//_}"
+
+    if port_in_use "${port}"; then
+        port="$(find_available_port "$((port + 1))")"
+        SLOT_PORTS[$slot_idx]="${port}"
+        echo "[WARN] slot=${slot_idx} original port ${original_port} is still occupied, switching to ${port}"
+    fi
+
     local slot_label="slot${slot_idx}_gpu${gpu_id}_port${port}"
     local server_log="${LOG_DIR}/${task_safe}_${TASK_CONFIG}_${slot_label}_server.log"
     local eval_log="${LOG_DIR}/${task_safe}_${TASK_CONFIG}_${slot_label}_eval.log"
@@ -363,8 +386,15 @@ launch_task_in_slot() {
         server_pid=""
         cleanup_server() {
             if [[ -n "${server_pid}" ]] && kill -0 "${server_pid}" 2>/dev/null; then
-                kill "${server_pid}" 2>/dev/null || true
+                kill_descendants "${server_pid}" TERM
+                sleep 2
+                if kill -0 "${server_pid}" 2>/dev/null; then
+                    kill_descendants "${server_pid}" KILL
+                fi
                 wait "${server_pid}" 2>/dev/null || true
+            fi
+            if ! wait_for_port_release "${port}" 30; then
+                echo "[WARN] port ${port} is still occupied after cleanup; a later task will allocate a new one." >&2
             fi
         }
         trap cleanup_server EXIT INT TERM
@@ -485,7 +515,7 @@ prepare_runtime_dependencies
 ckpt_name="$(basename "${CKPT_PATH}")"
 ckpt_stem="${ckpt_name%.*}"
 timestamp="$(date +%Y%m%d_%H%M%S)"
-LOG_DIR="${ROBOTWIN_LOG_ROOT:-$(dirname "${CKPT_PATH}")/robotwin_eval_logs/${POLICY_NAME}_${TASK_CONFIG}_${ckpt_stem}_${timestamp}}"
+LOG_DIR="${ROBOTWIN_LOG_ROOT:-${REPO_ROOT}/.eval4_logs/robotwin/${POLICY_NAME}_${TASK_CONFIG}_${ckpt_stem}_${timestamp}}"
 mkdir -p "${LOG_DIR}"
 
 next_port="${BASE_PORT}"

@@ -7,9 +7,9 @@ is_debug: false
 version_id: "0.21"
 
 framework:
-  name: QwenFast
+  name: QwenOFT
   qwenvl:
-    base_vlm: ./playground/Pretrained_models/Qwen3-VL-4B-Instruct
+    base_vlm: ./playground/Pretrained_models/Qwen3-VL-4B-Instruct-Action
     attn_implementation: flash_attention_2
     vl_hidden_dim: 2048
   action_model:
@@ -62,7 +62,7 @@ trainer:
   weight_decay: 0.0
   logging_frequency: 10
   gradient_clipping: 1.0
-  gradient_accumulation_steps: 4
+  gradient_accumulation_steps: 1
   gradient_checkpointing: true
 
   optimizer:

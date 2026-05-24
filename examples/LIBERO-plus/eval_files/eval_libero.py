@@ -4,7 +4,12 @@ import logging
 import math
 import os
 import pathlib
+import sys
 import time
+
+starvla_torch_site = os.environ.get("STARVLA_TORCH_SITE")
+if starvla_torch_site:
+    sys.path.append(starvla_torch_site)
 
 import imageio
 import numpy as np
@@ -14,7 +19,7 @@ from libero.libero import benchmark, get_libero_path
 from libero.libero.envs import OffScreenRenderEnv
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
-from examples.LIBERO.eval_files.model2libero_interface import ModelClient
+from model2libero_interface import ModelClient
 
 LIBERO_DUMMY_ACTION = [0.0] * 6 + [-1.0]
 LIBERO_ENV_RESOLUTION = 256  # resolution used to render training data

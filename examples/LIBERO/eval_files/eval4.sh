@@ -13,7 +13,7 @@ Usage:
   $(basename "$0") <ckpt_path> [num_trials_per_task]
 
 Example:
-  $(basename "$0") playground/Checkpoints/foo/checkpoints/steps_80000_pytorch_model.pt
+  $(basename "$0") /home/liuyue/starVLA/playground/Checkpoints/QwenFAST_Libero_Qwen3-4B/checkpoints/steps_30000_pytorch_model.pt
 USAGE
 }
 

@@ -1,5 +1,5 @@
-export CUDA_VISIBLE_DEVICES=0,1,2,7
-export NCCL_SOCKET_IFNAME=eno1
+export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
+export NCCL_SOCKET_IFNAME=lo
 unset NCCL_IB_HCA
 
 # used for check save when communication
@@ -9,14 +9,14 @@ export NCCL_TIMEOUT=10000  # timeout set to 1 hour (unit: seconds)
 export NCCL_SOCKET_TIMEOUT_MS=360000
 ###########################################################################################
 # === Please modify the following paths according to your environment ===
-Framework_name=QwenFast
+Framework_name=QwenOFT
 freeze_module_list=''
 base_vlm=playground/Pretrained_models/Qwen3-VL-4B-Instruct-Action
 config_yaml=./examples/LIBERO/train_files/starvla_cotrain_libero.yaml
 libero_data_root=playground/Datasets/libero
 data_mix=libero_all
 run_root_dir=./playground/Checkpoints
-run_id=QwenFAST_Libero_Qwen3-4B
+run_id=QwenOFT_Libero_Qwen3-4B
 # === End of environment variable configuration ===
 ###########################################################################################
 
@@ -40,10 +40,10 @@ accelerate launch \
   --framework.qwenvl.base_vlm ${base_vlm} \
   --datasets.vla_data.data_root_dir ${libero_data_root} \
   --datasets.vla_data.data_mix ${data_mix} \
-  --datasets.vla_data.per_device_batch_size 8 \
+  --datasets.vla_data.per_device_batch_size 16 \
   --trainer.vla_data.video_backend torchvision_av \
   --trainer.freeze_modules ${freeze_module_list} \
-  --trainer.max_train_steps 100000 \
+  --trainer.max_train_steps 30000 \
   --trainer.save_interval 10000 \
   --trainer.logging_frequency 100 \
   --trainer.eval_interval 1000 \
