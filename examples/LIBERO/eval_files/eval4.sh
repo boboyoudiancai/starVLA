@@ -26,17 +26,18 @@ CKPT_INPUT="$1"
 NUM_TRIALS_PER_TASK="${2:-50}"
 
 if [[ "${CKPT_INPUT}" = /* ]]; then
-  CKPT="${CKPT_INPUT}"
+  CKPT_ABS="${CKPT_INPUT}"
 else
-  CKPT="${REPO_ROOT}/${CKPT_INPUT}"
+  CKPT_ABS="${REPO_ROOT}/${CKPT_INPUT}"
 fi
-CKPT="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "${CKPT}")"
+CKPT_ABS="$(python3 -c 'import os,sys; print(os.path.abspath(sys.argv[1]))' "${CKPT_ABS}")"
+CKPT="$(python3 -c 'import os,sys; print(os.path.realpath(sys.argv[1]))' "${CKPT_ABS}")"
 
-if [[ ! -f "${CKPT}" ]]; then
+if [[ ! -f "${CKPT_ABS}" ]]; then
   echo "checkpoint not found: ${CKPT}" >&2
   exit 1
 fi
-if [[ "${CKPT}" != "${REPO_ROOT}"/* ]]; then
+if [[ "${CKPT_ABS}" != "${REPO_ROOT}"/* && "${CKPT}" != "${REPO_ROOT}"/* ]]; then
   echo "checkpoint must live under REPO_ROOT: ${REPO_ROOT}" >&2
   exit 1
 fi
@@ -157,11 +158,18 @@ if [[ -z "${RENDER_GPU}" ]]; then
   exit 1
 fi
 
-FOLDER_NAME="$(python3 - <<'PY' "${CKPT}"
-import os, sys
-ckpt = os.path.realpath(sys.argv[1])
-parts = ckpt.strip('/').split('/')
-print(f"{parts[-3]}_{parts[-2]}_{parts[-1]}")
+FOLDER_NAME="$(python3 - <<'PY' "${REPO_ROOT}" "${CKPT_ABS}"
+import os, re, sys
+repo_root = os.path.abspath(sys.argv[1])
+ckpt_abs = os.path.abspath(sys.argv[2])
+try:
+    rel = os.path.relpath(ckpt_abs, repo_root)
+except ValueError:
+    rel = os.path.basename(ckpt_abs)
+tag = rel if not rel.startswith("..") else os.path.basename(ckpt_abs)
+tag = re.sub(r"[\\/]+", "_", tag)
+tag = re.sub(r"[^A-Za-z0-9._-]+", "_", tag).strip("._")
+print(tag or "checkpoint")
 PY
 )"
 RUN_ROOT="${RESULTS_ROOT}/${FOLDER_NAME}"
