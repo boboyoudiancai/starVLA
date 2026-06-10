@@ -95,6 +95,8 @@ if [[ ! -x "${EVAL_PY}" ]]; then
   echo "eval python not found: ${EVAL_PY}" >&2
   exit 1
 fi
+EVAL_ENV_PREFIX="$(cd "$(dirname "${EVAL_PY}")/.." && pwd)"
+EVAL_LD_LIBRARY_PATH="${EVAL_ENV_PREFIX}/lib:${LD_LIBRARY_PATH:-}"
 if [[ ! -d "${LIBERO_PLUS_HOME}" ]]; then
   echo "LIBERO_PLUS_HOME not found: ${LIBERO_PLUS_HOME}" >&2
   exit 1
@@ -152,6 +154,7 @@ find_render_gpu() {
     [[ -n "${idx}" ]] || continue
     if MUJOCO_GL=egl PYOPENGL_PLATFORM=egl MUJOCO_EGL_DEVICE_ID="${idx}" \
       STARVLA_TORCH_SITE="${SERVER_SITE_PACKAGES}" \
+      LD_LIBRARY_PATH="${EVAL_LD_LIBRARY_PATH}" \
       LIBERO_HOME="${LIBERO_PLUS_HOME}" \
       LIBERO_CONFIG_PATH="${LIBERO_CONFIG_PATH}" \
       PYTHONPATH="${LIBERO_PLUS_HOME}:${REPO_ROOT}:${PYTHONPATH:-}" \
@@ -233,6 +236,7 @@ TXT
     SERVER_GPU="${server_gpu}" \
     RENDER_GPU="${RENDER_GPU}" \
     STARVLA_TORCH_SITE="${SERVER_SITE_PACKAGES}" \
+    LD_LIBRARY_PATH="${EVAL_LD_LIBRARY_PATH}" \
     HOST="${HOST}" \
     PORT="${port}" \
     OUT_DIR="${out_dir}" \
